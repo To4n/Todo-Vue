@@ -1,24 +1,7 @@
 # todo-demo
 
-## Project setup
+## Project Purpose
 ```
-npm install
-```
-
-### Compiles and hot-reloads for development
-```
-npm run serve
+Learn basic of Vuejs through simple Todo App
 ```
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
