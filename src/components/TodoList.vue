@@ -7,12 +7,15 @@
         v-model="newTodo" 
         @keyup.enter="addTodo"
     >
-    <div 
+    <todo-item 
         v-for="(todo, index) in todosFiltered"
         :key="todo.id"
-        class="todo-item"
+        :todo="todo"
+        :index="index"
+        @removedTodo="removeTodo"
+        @finishedTodo="doneTodo"
     >
-        <div class="todo-item-left">
+        <!-- <div class="todo-item-left">
             
             <div 
                 class="todo-item-label"
@@ -40,9 +43,9 @@
         
         <div class="remove-todo" @click="removeTodo(index)">
             &times;
-        </div>
+        </div> -->
 
-    </div>
+    </todo-item>
     <div 
         class="extra-container">
         <div>
@@ -88,8 +91,13 @@
 </template>
 
 <script>
+import TodoItem from './TodoItem'
+
 export default {
   name: 'todo-list',
+  components:{
+      TodoItem
+  },
   data(){
       return{
           newTodo: '',
