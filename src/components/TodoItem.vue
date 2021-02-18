@@ -1,15 +1,16 @@
 <template>
   <div class="todo-item">
     <div class="todo-item-left">
-        <input 
-            type="checkbox" 
-            v-model="completed" 
-            @change="doneTodo">
+        
         <div 
             v-if="!editing" 
             @dblclick="editTodo" 
             class="todo-item-label" 
             :class="{ completed : completed }">
+            <input 
+            type="checkbox" 
+            v-model="completed" 
+            @change="doneTodo">
                 {{ title }}
         </div>
         <input 
