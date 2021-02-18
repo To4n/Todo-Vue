@@ -8,42 +8,14 @@
         @keyup.enter="addTodo"
     >
     <todo-item 
-        v-for="(todo, index) in todosFiltered"
+        v-for="todo in todosFiltered"
         :key="todo.id"
         :todo="todo"
-        :index="index"
         @removedTodo="removeTodo"
-        @finishedTodo="doneTodo"
+        @finishedTodo="finishedTodo"
+        :checkAll="!anyRemaining"
     >
-        <!-- <div class="todo-item-left">
-            
-            <div 
-                class="todo-item-label"
-                :class="{completed  : todo.completed}"
-                v-if="!todo.editing"
-                @dblclick="editTodo(todo)"
-            >
-                <input 
-                type="checkbox"
-                v-model="todo.completed"
-                >
-                {{todo.title}}  
-            </div>
-            <input
-                v-else
-                type="text"
-                class="todo-item-edit"
-                v-model="todo.title"
-                @blur="doneTodo(todo)"
-                @keyup.enter="doneTodo(todo)"
-                @keyup.esc="cancelEdit(todo)"
-                v-focus
-            >    
-        </div>
         
-        <div class="remove-todo" @click="removeTodo(index)">
-            &times;
-        </div> -->
 
     </todo-item>
     <div 
@@ -102,7 +74,6 @@ export default {
       return{
           newTodo: '',
           idForTodo: 3,
-          beforeEditCache : '',
           filter: 'all',
           todos: [
           {
@@ -144,14 +115,7 @@ export default {
           return this.todos.filter(todo => todo.completed).length > 0
       }
   },
-  directives: {
-    focus: {
-        // directive definition
-        inserted: function (el) {
-        el.focus()
-        }
-    }
-   },
+  
   methods:{
       addTodo(){
           if(this.newTodo.trim().length == 0){
@@ -161,34 +125,25 @@ export default {
               id: this.idForTodo,
               title: this.newTodo,
               completed: false,
-              editing: false
           })
 
         this.newTodo =''
         this.idForTodo++
       },
-      removeTodo(index){
+      removeTodo(id){
+          const index = this.todos.findIndex((item) => item.id == id)
           this.todos.splice(index,1)
       },
-      editTodo(todo){
-          this.beforeEditCache = todo.title
-          todo.editing =true
-      },
-      doneTodo(todo){
-          if(todo.title.trim() == ''){
-              todo.title = this.beforeEditCache
-          }
-          todo.editing = false
-      },
-      cancelEdit(todo){
-          todo.editing = false
-          todo.title = this.beforeEditCache
-      },
+      
       checkAllTodos(){
           this.todos.forEach((todo) => todo.completed = event.target.checked)
       },
       clearCompleted(){
           this.todos = this.todos.filter(todo => !todo.completed)
+      },
+      finishedTodo(data){
+          const index = this.todos.findIndex((item) => item.id == data.id)
+          this.todo.splice(index, 1, data.todo)
       }
   }
 }
