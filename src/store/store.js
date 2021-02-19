@@ -1,25 +1,14 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import db from '../firebase'
 
 Vue.use(Vuex)
 
 export const store = new Vuex.Store({
     state: {
+        loading: true,
         filter: 'all',
-        todos: [
-            {
-                'id': 1,
-                'title': 'Do laundry',
-                'completed': false, 
-                'editing': false  
-            },
-            {
-                'id': 2,
-                'title': 'Sleep',
-                'completed': false,  
-                'editing': false 
-            }
-        ]
+        todos: []
     },
     getters:{
         remaining(state){
@@ -44,6 +33,9 @@ export const store = new Vuex.Store({
         }
     },
     mutations:{
+        retrieveTodos(state, payload){
+            state.todos = payload
+        },
         addTodo(state, payload){
             state.todos.push({
                 id: payload.id,
@@ -79,21 +71,86 @@ export const store = new Vuex.Store({
 
     },
     actions:{
+        retrieveTodos(context){
+            context.state.loading = true
+            db.collection('tasks').orderBy("timestamp","desc").get()
+            .then(querySnapshot =>{
+                let tempTodos = []
+                querySnapshot.forEach(doc => {
+                    const data = {
+                        id: doc.id,
+                        title: doc.data().title,
+                        completed: doc.data().completed,
+                        timestamp: doc.data().timestamp
+                    }
+                    tempTodos.push(data)
+                })
+                context.state.loading = false
+                context.commit('retrieveTodos', tempTodos)
+            })
+        },
         addTodo(context, payload){
-            context.commit('addTodo', payload)
+            db.collection('tasks').add({
+                title: payload.title,
+                completed: false,
+                timestamp: new Date()
+            })
+            .then(docRef => {
+                context.commit('addTodo',{
+                    id: docRef.id,
+                    title: payload.title,
+                    completed: false,
+                    timestamp: new Date()
+                })
+            })
+            
         },
         updateTodo(context, payload) {
-              context.commit('updateTodo', payload)
+              db.collection('tasks').doc(payload.id).update({
+                  title: payload.title,
+                  completed: payload.completed,
+                  timestamp: new Date(),
+              })
+              .then(() =>{
+                  context.commit('updateTodo',{
+                      id: payload.id,
+                      title: payload.title,
+                      completed: payload.completed,
+                      timestamp: new Date()
+                  })
+              })
         },
         clearCompleted(context){
-            context.commit('clearCompleted')
+            db.collection('tasks').where('completed', '==', true).get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(doc =>{
+                    doc.ref.delete()
+                    .then(() => {
+                        context.commit('clearCompleted')
+                    })
+                })
+                
+            })
         },
         removeTodo(context, payload){
-            context.commit('removeTodo', payload)
+            db.collection('tasks').doc(payload).delete()
+            .then(() => {
+                context.commit('removeTodo', payload)
+            })
         },
         
         checkAllTodos(context, payload){
-            context.commit('checkAllTodos', payload)
+            db.collection('tasks').get()
+            .then(querySnapshot => { 
+                querySnapshot.forEach(doc =>{
+                    doc.ref.update({
+                        completed: payload
+                    })
+                })
+                .then(() => {
+                    context.commit('checkAllTodos', payload)
+                })
+            })
         },
         updateFilter(context, filter) {
               context.commit('updateFilter', filter)

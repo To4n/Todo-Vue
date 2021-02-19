@@ -71,7 +71,7 @@ export default {
    },
    methods:{
         removeTodo(id) {
-            this.$store.dispatch('deleteTodo', id)
+            this.$store.dispatch('removeTodo', id)
         },
         editTodo(){
           this.beforeEditCache = this.title
